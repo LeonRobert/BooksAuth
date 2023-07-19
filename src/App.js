@@ -171,9 +171,6 @@ function App() {
       AuthService.setLoggedInUser(user)
       setLoggedIn(true)
       loadBooks(user.username)
-      // const userBooks = await BookService.getBooks(user.username)
-
-      // setBooks(userBooks)
     } catch (error) {
       console.error(error)
     }
