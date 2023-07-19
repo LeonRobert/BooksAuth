@@ -170,6 +170,7 @@ function App() {
       )
       AuthService.setLoggedInUser(user)
       setLoggedIn(true)
+      setUser(user.username)
       loadBooks(user.username)
     } catch (error) {
       console.error(error)
