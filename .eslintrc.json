@@ -1,5 +1,12 @@
 {
   "root": true,
-  "extends": ["prettier", "plugin:prettier/recommended"],
+  "ignorePatterns": ["**/*"],
+  "extends": [
+    "prettier",
+    "plugin:prettier/recommended",
+    "plugin:react/recommended",
+    "plugin:eslint/recommended"
+  ],
+  "parser": "babel-eslint",
   "plugins": ["react", "prettier"]
 }
