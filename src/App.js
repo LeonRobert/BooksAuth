@@ -15,6 +15,9 @@ import {
 import './App.css'
 import { useForm } from '@mantine/form'
 
+import AuthService from './services/auth'
+import BookService from './services/books'
+
 const useStyles = createStyles((theme) => ({
   header: {
     paddingLeft: theme.spacing.md,
@@ -31,7 +34,6 @@ const useStyles = createStyles((theme) => ({
     boxShadow: theme.shadows.sm,
 
     [theme.fn.smallerThan(1100)]: {
-      // display: 'block',
       overflowX: 'scroll',
 
       '& tbody tr td': {
@@ -70,74 +72,6 @@ const useStyles = createStyles((theme) => ({
     },
   },
 }))
-
-// Mock-up AUTH service
-const AuthService = {
-  login(username, password) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (username === 'user1' && password === 'password1') {
-          resolve({ username: 'user1' })
-        } else if (username === 'user2' && password === 'password2') {
-          resolve({ username: 'user2' })
-        } else {
-          reject(new Error('Invalid username or password'))
-        }
-      }, 1000)
-    })
-  },
-  setLoggedInUser(user, sessionTimeout) {
-    const now = new Date()
-    const expirationTime = new Date(now.getTime() + sessionTimeout * 1000)
-    const userData = { user, expirationTime: expirationTime.toISOString() }
-    localStorage.setItem('loggedInUser', JSON.stringify(userData))
-  },
-
-  getLoggedInUser() {
-    const userData = localStorage.getItem('loggedInUser')
-    if (!userData) return null
-
-    const { user, expirationTime } = JSON.parse(userData)
-    const now = new Date()
-    if (new Date(expirationTime) > now) {
-      return user
-    } else {
-      AuthService.clearLoggedInUser()
-      return null
-    }
-  },
-
-  clearLoggedInUser() {
-    localStorage.removeItem('loggedInUser')
-  },
-}
-
-// Mock-up Booking service
-const BookService = {
-  getBooks(username) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Read books from JSON file
-        fetch('books.json')
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error('Failed to fetch book data')
-            }
-            return response.json()
-          })
-          .then((data) => {
-            const user = data.users.find((user) => user.username === username)
-            if (user) {
-              resolve(user.books)
-            } else {
-              reject(new Error('User not found'))
-            }
-          })
-          .catch((error) => reject(error))
-      }, 1000)
-    })
-  },
-}
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false)
