@@ -11,6 +11,8 @@ import {
   Group,
   ScrollArea,
   Table,
+  Loader,
+  Skeleton,
 } from '@mantine/core'
 import './App.css'
 import { useForm } from '@mantine/form'
@@ -75,6 +77,7 @@ const useStyles = createStyles((theme) => ({
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [user, setUser] = useState('')
   const [books, setBooks] = useState([])
   const { classes } = useStyles()
@@ -101,16 +104,20 @@ function App() {
 
   const loadBooks = async (username) => {
     try {
+      setLoading(true)
       const userBooks = await BookService.getBooks(username)
       setBooks(userBooks)
     } catch (error) {
       console.error(error)
+    } finally {
+      setLoading(false)
     }
   }
 
   const handleLogin = async (e) => {
     e.preventDefault()
     try {
+      setLoading(true)
       const user = await AuthService.login(
         form.values.username,
         form.values.password
@@ -118,9 +125,11 @@ function App() {
       AuthService.setLoggedInUser(user, 3600)
       setLoggedIn(true)
       setUser(user.username)
-      loadBooks(user.username)
+      await loadBooks(user.username)
     } catch (error) {
       console.error(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -149,60 +158,73 @@ function App() {
           </Header>
           <div className={classes.content}>
             <h2>Welcome, {user}!</h2>
-
-            <ScrollArea
-              h={300}
-              onScrollPositionChange={({ y }) => setScrolled(y !== 0)}
-            >
-              <Table className={classes.table} fontSize="xs">
-                <thead>
-                  <tr>
-                    <th className={classes.th}>Title</th>
-                    <th className={classes.th}>Author</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {books.map((book) => (
-                    <tr key={book.id}>
-                      <td>{book.title}</td>
-                      <td>{book.author}</td>
+            {loading ? (
+              <Skeleton
+                st
+                height={70}
+                width="60%"
+                radius="xl"
+                style={{ display: 'inline-flex' }}
+              />
+            ) : (
+              <ScrollArea
+                h={300}
+                onScrollPositionChange={({ y }) => setScrolled(y !== 0)}
+              >
+                <Table className={classes.table} fontSize="xs">
+                  <thead>
+                    <tr>
+                      <th className={classes.th}>Title</th>
+                      <th className={classes.th}>Author</th>
                     </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </ScrollArea>
+                  </thead>
+                  <tbody>
+                    {books.map((book) => (
+                      <tr key={book.id}>
+                        <td>{book.title}</td>
+                        <td>{book.author}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </ScrollArea>
+            )}
           </div>
         </div>
       ) : (
         <Container size={420} my={80}>
-          <form onSubmit={handleLogin}>
-            <Paper withBorder shadow="md" p={30} mt={30} radius="md">
-              <Title order={2} ta="center" mt="md" mb={50}>
-                Welcome to the book App!
-              </Title>
+          {loading ? (
+            <Loader />
+          ) : (
+            <form onSubmit={handleLogin}>
+              <Paper withBorder shadow="md" p={30} mt={30} radius="md">
+                <Title order={2} ta="center" mt="md" mb={50}>
+                  Welcome to the book App!
+                </Title>
 
-              <TextInput
-                label="Username"
-                placeholder="Username"
-                autoComplete="username"
-                size="md"
-                required
-                {...form.getInputProps('username')}
-              />
-              <PasswordInput
-                label="Password"
-                placeholder="Your password"
-                autoComplete="current-password"
-                required
-                size="md"
-                mt="md"
-                {...form.getInputProps('password')}
-              />
-              <Button type="submit" fullWidth mt="xl" size="md">
-                Login
-              </Button>
-            </Paper>
-          </form>
+                <TextInput
+                  label="Username"
+                  placeholder="Username"
+                  autoComplete="username"
+                  size="md"
+                  required
+                  {...form.getInputProps('username')}
+                />
+                <PasswordInput
+                  label="Password"
+                  placeholder="Your password"
+                  autoComplete="current-password"
+                  required
+                  size="md"
+                  mt="md"
+                  {...form.getInputProps('password')}
+                />
+                <Button type="submit" fullWidth mt="xl" size="md">
+                  Login
+                </Button>
+              </Paper>
+            </form>
+          )}
         </Container>
       )}
     </div>

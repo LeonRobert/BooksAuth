@@ -3,9 +3,9 @@ const AuthService = {
   login(username, password) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        if (username === 'user1' && password === 'password1') {
+        if (username === 'user1' && password === 'pass1') {
           resolve({ username: 'user1' })
-        } else if (username === 'user2' && password === 'password2') {
+        } else if (username === 'user2' && password === 'pass2') {
           resolve({ username: 'user2' })
         } else {
           reject(new Error('Invalid username or password'))
