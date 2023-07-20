@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import {
+  Alert,
   Header,
   Paper,
   TextInput,
@@ -78,6 +79,7 @@ const useStyles = createStyles((theme) => ({
 function App() {
   const [loggedIn, setLoggedIn] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [user, setUser] = useState('')
   const [books, setBooks] = useState([])
   const { classes } = useStyles()
@@ -118,6 +120,7 @@ function App() {
     e.preventDefault()
     try {
       setLoading(true)
+      setError('')
       const user = await AuthService.login(
         form.values.username,
         form.values.password
@@ -127,7 +130,8 @@ function App() {
       setUser(user.username)
       await loadBooks(user.username)
     } catch (error) {
-      console.error(error)
+      console.log(error)
+      setError('Invalid username or password')
     } finally {
       setLoading(false)
     }
@@ -223,6 +227,16 @@ function App() {
                   Login
                 </Button>
               </Paper>
+              {error && (
+                <Alert
+                  style={{ display: 'inline-flex', width: 'auto' }}
+                  title={error}
+                  color="red"
+                  mt="lg"
+                >
+                  Please try again!
+                </Alert>
+              )}
             </form>
           )}
         </Container>
