@@ -9,7 +9,6 @@ import {
   Container,
   createStyles,
   Group,
-  Menu,
   ScrollArea,
   Table,
 } from '@mantine/core'
@@ -20,6 +19,8 @@ const useStyles = createStyles((theme) => ({
   header: {
     paddingLeft: theme.spacing.md,
     paddingRight: theme.spacing.md,
+  },
+  logout: {
     justifyContent: 'flex-end',
   },
   table: {
@@ -30,7 +31,7 @@ const useStyles = createStyles((theme) => ({
     boxShadow: theme.shadows.sm,
 
     [theme.fn.smallerThan(1100)]: {
-      display: 'block',
+      // display: 'block',
       overflowX: 'scroll',
 
       '& tbody tr td': {
@@ -85,13 +86,25 @@ const AuthService = {
       }, 1000)
     })
   },
-  setLoggedInUser(user) {
-    localStorage.setItem('loggedInUser', JSON.stringify(user))
+  setLoggedInUser(user, sessionTimeout) {
+    const now = new Date()
+    const expirationTime = new Date(now.getTime() + sessionTimeout * 1000)
+    const userData = { user, expirationTime: expirationTime.toISOString() }
+    localStorage.setItem('loggedInUser', JSON.stringify(userData))
   },
 
   getLoggedInUser() {
-    const user = localStorage.getItem('loggedInUser')
-    return user ? JSON.parse(user) : null
+    const userData = localStorage.getItem('loggedInUser')
+    if (!userData) return null
+
+    const { user, expirationTime } = JSON.parse(userData)
+    const now = new Date()
+    if (new Date(expirationTime) > now) {
+      return user
+    } else {
+      AuthService.clearLoggedInUser()
+      return null
+    }
   },
 
   clearLoggedInUser() {
@@ -168,7 +181,7 @@ function App() {
         form.values.username,
         form.values.password
       )
-      AuthService.setLoggedInUser(user)
+      AuthService.setLoggedInUser(user, 3600)
       setLoggedIn(true)
       setUser(user.username)
       loadBooks(user.username)
@@ -196,7 +209,7 @@ function App() {
             zIndex={9999}
             fixed={true}
           >
-            <Group ml={50} spacing={5}>
+            <Group ml={50} spacing={5} className={classes.logout}>
               <Button onClick={handleLogout}>Logout</Button>
             </Group>
           </Header>
